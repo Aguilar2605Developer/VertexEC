@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  background-color: #0e0d0b;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: dark;
+  background-image: url('https://img.freepik.com/fotos-premium/vista-arriba-diseno-arquitectura-construccion-edificio-oficina-cerrada-sede-color-negro-oscuro-contra-cielo-gris-sombrio-edificio-negro-3d-render_507676-1373.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.min-vh-100 {
+  background-color: rgba(10, 9, 8, 0.55);
+}
+
+/* ── Card ── */
+.card {
+  background-color: #1a1916;
+  border: 0.5px solid #2e2d2a !important;
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7);
+  animation: slideUp 0.4s ease-out;
+}
+
+.card-body {
+  background-color: #1a1916;
+  border-radius: 14px;
+  padding: 2.5rem !important;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Header / Brand ── */
+h1 {
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: #c9a84c;
+  font-weight: 600;
+}
+
+h4 {
+  font-size: 15px;
+  font-weight: 500;
+  color: #c8c6c0;
+  letter-spacing: 0.02em;
+}
+
+.text-muted {
+  color: #5a5950 !important;
+  font-size: 13px;
+}
+
+.text-primary {
+  color: #c9a84c !important;
+}
+
+/* ── Formularios ── */
+.form-control {
+  background-color: #0e0d0b;
+  border: 0.5px solid #2e2d2a;
+  border-radius: 8px;
+  color: #c8c6c0;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  padding: 10px 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:hover {
+  border-color: #3a3830;
+}
+
+.form-control:focus {
+  background-color: #0e0d0b;
+  border-color: #c9a84c;
+  color: #e8e6e0;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+}
+
+.form-control::placeholder {
+  color: #3a3830;
+}
+
+.form-label {
+  color: #5a5950;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* ── Botones ── */
+.btn {
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 11px 0;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+}
+
+.btn-primary {
+  background-color: #c9a84c;
+  border: none;
+  color: #0e0d0a;
+}
+
+.btn-primary:hover {
+  background-color: #e8c46a;
+  color: #0e0d0a;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  background-color: #c9a84c;
+}
+
+.btn-success {
+  background-color: transparent;
+  border: 0.5px solid #2a4a2a;
+  color: #6bbf6b;
+}
+
+.btn-success:hover {
+  background-color: #141e14;
+  border-color: #3a6a3a;
+  color: #8fd48f;
+  transform: translateY(-1px);
+}
+
+.btn-success:active {
+  transform: scale(0.98);
+}
+
+/* ── Links ── */
+a {
+  color: #c9a84c;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: #e8c46a;
+}
+
+/* ── Alertas ── */
+.alert {
+  border-radius: 8px;
+  font-size: 13px;
+  animation: slideDown 0.25s ease-out;
+}
+
+.alert-success {
+  background-color: #111a11 !important;
+  border: 0.5px solid #2a4a2a !important;
+  color: #6bbf6b !important;
+}
+
+.alert-danger {
+  background-color: #1a1010 !important;
+  border: 0.5px solid #3a2020 !important;
+  color: #c07070 !important;
+}
+
+.alert-warning {
+  background-color: #1e1b10 !important;
+  border: 0.5px solid #3a3215 !important;
+  color: #c9a84c !important;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Texto auxiliar ── */
+.text-center p {
+  color: #5a5950;
+  font-size: 13px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0e0d0b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2e2d2a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3830;
+}

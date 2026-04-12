@@ -1,0 +1,2 @@
+@echo off
+powershell -Command "try { $pids = netstat -ano | findstr :3000 | ForEach-Object { $_.Split(' ', [System.StringSplitOptions]::RemoveEmptyEntries)[-1] } | Where-Object { $_ -ne 0 } | Select-Object -Unique; foreach ($pid in $pids) { taskkill /PID $pid /F 2>$null } } catch { }"
