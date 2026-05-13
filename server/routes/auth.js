@@ -8,7 +8,9 @@ const inMemoryStore = require('../utils/inMemoryStore');
 // Sign Up - Registro de usuario
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password, company, phone } = req.body;
+    const { name, email, password, company, phone, role } = req.body;
+    const allowedRoles = ['user', 'admin'];
+    const userRole = allowedRoles.includes(role) ? role : 'user';
     
     // Validar que vengan los datos requeridos
     if (!name || !email || !password) {
@@ -30,7 +32,7 @@ router.post('/signup', async (req, res) => {
         password,
         company,
         phone,
-        role: 'user'
+        role: userRole
       });
       
       await user.save();
@@ -61,7 +63,7 @@ router.post('/signup', async (req, res) => {
         password: hashedPassword,
         company,
         phone,
-        role: 'user'
+        role: userRole
       };
       
       inMemoryStore.users.push(user);
@@ -82,7 +84,7 @@ router.post('/signup', async (req, res) => {
 // Login - Iniciar sesión
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     
     // Validar que vengan los datos
     if (!email || !password) {
@@ -95,6 +97,10 @@ router.post('/login', async (req, res) => {
       const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) {
         return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+      }
+      
+      if (role && role !== user.role) {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
       }
       
       // Verificar contraseña
@@ -116,6 +122,10 @@ router.post('/login', async (req, res) => {
       const user = inMemoryStore.users.find(u => u.email === email.toLowerCase());
       if (!user) {
         return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+      }
+      
+      if (role && role !== user.role) {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
       }
       
       // Verificar contraseña (in-memory usa bcryptjs)

@@ -164,6 +164,16 @@ a:hover {
   color: #e8c46a;
 }
 
+.user-type-toggle .btn {
+  min-width: 110px;
+}
+
+.user-type-toggle .btn.active {
+  background-color: #c9a84c;
+  border-color: #c9a84c;
+  color: #0e0d0b;
+}
+
 /* ── Alertas ── */
 .alert {
   border-radius: 8px;

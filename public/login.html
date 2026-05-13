@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="css/login.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
   <div class="container min-vh-100 d-flex align-items-center justify-content-center">
     <div class="row w-100">
       <div class="col-md-6 offset-md-3 col-lg-4 offset-lg-4">
@@ -15,15 +15,22 @@
           <div class="card-body p-5">
             <div class="text-center mb-4">
               <h1 class="text-primary fw-bold">VertexEC</h1>
-              <p class="text-muted">Sistema de Cotización de Planos</p>
+              <p class="text-muted">Cotiza planos y controla tus proyectos de construcción</p>
             </div>
 
             <div id="alertContainer"></div>
 
+            <div class="d-flex justify-content-between align-items-center mb-4 user-type-toggle">
+              <button type="button" class="btn btn-outline-light btn-sm active" id="clientTypeBtn" onclick="setLoginType('user')">Cliente</button>
+              <button type="button" class="btn btn-outline-light btn-sm" id="proTypeBtn" onclick="setLoginType('admin')">Empleado</button>
+            </div>
+            <p class="text-center text-muted mb-4" id="userTypeDescription">Accede como cliente para enviar solicitudes de cotización y revisar propuestas.</p>
+
             <!-- Tab: Login -->
             <div id="loginTab">
-              <h4 class="mb-4 text-center">Iniciar Sesión</h4>
+              <h4 class="mb-4 text-center">Ingress sus credenciales</h4>
               <form id="loginForm">
+                <input type="hidden" id="loginRole" value="user">
                 <div class="mb-3">
                   <label for="loginEmail" class="form-label">Email</label>
                   <input type="email" class="form-control" id="loginEmail" required>
@@ -59,6 +66,13 @@
                 <div class="mb-3">
                   <label for="signupCompany" class="form-label">Empresa (Opcional)</label>
                   <input type="text" class="form-control" id="signupCompany">
+                </div>
+                <div class="mb-3">
+                  <label for="signupRole" class="form-label">Tipo de cuenta</label>
+                  <select class="form-select" id="signupRole">
+                    <option value="user">Cliente</option>
+                    <option value="admin">Empleado</option>
+                  </select>
                 </div>
                 <button type="submit" class="btn btn-success w-100 mb-3">Registrarse</button>
               </form>
