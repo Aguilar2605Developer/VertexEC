@@ -592,7 +592,7 @@ function displayUsers() {
       <td>${u.email}</td>
       <td>${u.company || '-'}</td>
       <td>
-        <span class="badge ${u.role === 'admin' ? 'bg-danger' : 'bg-secondary'}">${u.role === 'admin' ? 'Admin' : 'Usuario'}</span>
+        <span class="role-badge role-${u.role}">${u.role === 'admin' ? 'Administrador' : 'Usuario'}</span>
       </td>
       <td>${new Date(u.created_at).toLocaleDateString()}</td>
       <td>
