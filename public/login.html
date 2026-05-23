@@ -22,9 +22,11 @@
 
             <div class="d-flex justify-content-between align-items-center mb-4 user-type-toggle">
               <button type="button" class="btn btn-outline-light btn-sm active" id="clientTypeBtn" onclick="setLoginType('user')">Cliente</button>
-              <button type="button" class="btn btn-outline-light btn-sm" id="proTypeBtn" onclick="setLoginType('admin')">Empleado</button>
+              <button type="button" class="btn btn-outline-light btn-sm" id="proTypeBtn" onclick="setLoginType('employee')">Empleado</button>
+              <button type="button" class="btn btn-outline-light btn-sm d-none" id="adminTypeBtn" onclick="setLoginType('admin')">Administrador</button>
             </div>
-            <p class="text-center text-muted mb-4" id="userTypeDescription">Accede como cliente para enviar solicitudes de cotización y revisar propuestas.</p>
+            <p class="text-center text-muted mb-2" id="userTypeDescription">Accede como cliente para enviar solicitudes de cotización y revisar propuestas.</p>
+            <p class="text-center text-muted small mb-4" id="adminAccessHint">Presiona <strong>Ctrl + F1</strong> para habilitar el acceso de administrador.</p>
 
             <!-- Tab: Login -->
             <div id="loginTab">
@@ -71,8 +73,15 @@
                   <label for="signupRole" class="form-label">Tipo de cuenta</label>
                   <select class="form-select" id="signupRole">
                     <option value="user">Cliente</option>
-                    <option value="admin">Empleado</option>
+                    <option value="project_manager">Gerente de Proyecto / Coordinador General</option>
+                    <option value="architect">Arquitecto</option>
+                    <option value="structural_engineer">Ingeniero Estructural</option>
+                    <option value="installations_engineer">Ingeniero de Instalaciones (Eléctricas + Sanitarias + Mecánicas)</option>
+                    <option value="estimator">Estimador / Presupuestador</option>
+                    <option value="drafter">Dibujante / Modelador (CAD o BIM)</option>
+                    <option value="technical_reviewer">Revisor / Director Técnico</option>
                   </select>
+                  <small class="text-muted">Selecciona tu rol profesional dentro del flujo de cotización.</small>
                 </div>
                 <button type="submit" class="btn btn-success w-100 mb-3">Registrarse</button>
               </form>

@@ -5,6 +5,12 @@ const { verifyToken, verifyAdmin } = require('../middleware/auth');
 const { getMongoStatus } = require('../config/db');
 const inMemoryStore = require('../utils/inMemoryStore');
 
+const elevatedRoles = ['admin', 'project_manager'];
+
+function hasElevatedAccess(role) {
+  return elevatedRoles.includes(role);
+}
+
 // Todos requieren autenticación
 router.use(verifyToken);
 
@@ -12,7 +18,7 @@ router.use(verifyToken);
 router.get('/', async (req, res) => {
   try {
     if (getMongoStatus()) {
-      const query = req.user.role === 'admin' ? {} : { created_by: req.user.id };
+      const query = hasElevatedAccess(req.user.role) ? {} : { created_by: req.user.id };
       const quotations = await Quotation.find(query)
         .populate('created_by', 'name email')
         .sort({ created_at: -1 });
@@ -20,7 +26,7 @@ router.get('/', async (req, res) => {
       res.json(quotations);
     } else {
       // Fallback: usar in-memory store
-      const quotations = req.user.role === 'admin'
+      const quotations = hasElevatedAccess(req.user.role)
         ? inMemoryStore.quotations
         : inMemoryStore.quotations.filter(q => q.created_by === req.user.id);
       res.json(quotations);
@@ -55,7 +61,7 @@ router.get('/:id', async (req, res) => {
     }
     
     // Verificar que el usuario sea el propietario o admin
-    if (quotation.created_by._id.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (quotation.created_by._id.toString() !== req.user.id && !hasElevatedAccess(req.user.role)) {
       return res.status(403).json({ error: 'Acceso denegado' });
     }
     
@@ -112,7 +118,7 @@ router.put('/:id', async (req, res) => {
     }
     
     // Verificar permisos
-    if (quotation.created_by.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (quotation.created_by.toString() !== req.user.id && !hasElevatedAccess(req.user.role)) {
       return res.status(403).json({ error: 'Acceso denegado' });
     }
     
@@ -174,8 +180,8 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Cotización no encontrada' });
     }
     
-    // Solo el propietario o admin puede eliminar
-    if (quotation.created_by.toString() !== req.user.id && req.user.role !== 'admin') {
+    // Solo el propietario o acceso ejecutivo puede eliminar
+    if (quotation.created_by.toString() !== req.user.id && !hasElevatedAccess(req.user.role)) {
       return res.status(403).json({ error: 'Acceso denegado' });
     }
     
@@ -204,7 +210,7 @@ router.post('/:id/status', async (req, res) => {
     }
     
     // Verificar permisos
-    if (quotation.created_by.toString() !== req.user.id && req.user.role !== 'admin') {
+    if (quotation.created_by.toString() !== req.user.id && !hasElevatedAccess(req.user.role)) {
       return res.status(403).json({ error: 'Acceso denegado' });
     }
     

@@ -98,6 +98,29 @@ h4 {
   color: #3a3830;
 }
 
+.form-select {
+  background-color: #0e0d0b;
+  border: 0.5px solid #2e2d2a;
+  border-radius: 8px;
+  color: #c8c6c0;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  padding: 10px 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+}
+
+.form-select:hover {
+  border-color: #3a3830;
+}
+
+.form-select:focus {
+  background-color: #0e0d0b;
+  border-color: #c9a84c;
+  color: #e8e6e0;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+}
+
 .form-label {
   color: #5a5950;
   font-size: 11px;

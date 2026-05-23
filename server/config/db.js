@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Material = require('../models/material');
 const Project = require('../models/project');
+const User = require('../models/user');
 require('dotenv').config();
 
 let mongoConnected = false;
@@ -25,6 +26,7 @@ const connectMongo = async () => {
     console.log(`📍 Base de datos: ${process.env.MONGO_URI}`);
     
     await initializeSampleData();
+    await initializeAdminUser();
     return true;
   } catch (err) {
     console.log('⚠️  MongoDB no disponible');
@@ -55,6 +57,29 @@ const initializeSampleData = async () => {
     }
   } catch (err) {
     console.error('Error initializing sample data:', err.message);
+  }
+};
+
+const initializeAdminUser = async () => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@vertexec.local';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
+
+    const existingAdmin = await User.findOne({ role: 'admin' });
+    if (!existingAdmin) {
+      const adminUser = new User({
+        name: 'Administrador',
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+        company: 'VertexEC'
+      });
+      await adminUser.save();
+      console.log(`🔐 Usuario administrador creado: ${adminEmail}`);
+      console.log('   Contraseña inicial:', adminPassword);
+    }
+  } catch (err) {
+    console.error('Error initializing admin user:', err.message);
   }
 };
 

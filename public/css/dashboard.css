@@ -73,6 +73,86 @@ h5 {
   font-size: 15px;
 }
 
+.page-header {
+  padding: 1.5rem 0 0.25rem 0;
+}
+
+.page-subtitle {
+  display: inline-block;
+  color: #c9a84c;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  margin-bottom: 0.7rem;
+}
+
+.page-header h1 {
+  color: #f1f0ec;
+  font-size: 2.35rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.page-description {
+  color: #a8a69e;
+  font-size: 14px;
+  max-width: 650px;
+  line-height: 1.7;
+}
+
+.dashboard-summary {
+  margin-bottom: 1.75rem;
+}
+
+.summary-card {
+  background: #111210;
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  border-radius: 18px;
+  padding: 1.35rem 1.35rem 1.4rem;
+  min-height: 145px;
+}
+
+.summary-card .label {
+  color: #8a8880;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.85rem;
+}
+
+.summary-card .value {
+  color: #f7f2cf;
+  font-size: 2.15rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.summary-card .detail {
+  color: #a8a69e;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.dashboard-tabs .nav-link {
+  border-radius: 999px;
+  margin-right: 0.65rem;
+  padding: 0.8rem 1.25rem;
+  color: #c8c6c0;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+}
+
+.dashboard-tabs .nav-link.active {
+  color: #0e0d0b;
+  background-color: #c9a84c;
+  border-color: #c9a84c;
+}
+
+.dashboard-tabs .nav-link:hover {
+  color: #f5f2e8;
+  background-color: rgba(201, 168, 76, 0.15);
+}
+
 h6 {
   color: #6b6960;
   font-weight: 500;
@@ -162,6 +242,48 @@ h6 {
   border-color: rgba(201, 168, 76, 0.28);
 }
 
+.role-project_manager {
+  color: #d5f0ff;
+  background-color: rgba(26, 112, 171, 0.14);
+  border-color: rgba(26, 112, 171, 0.28);
+}
+
+.role-architect {
+  color: #d8f5d8;
+  background-color: rgba(39, 122, 62, 0.14);
+  border-color: rgba(39, 122, 62, 0.28);
+}
+
+.role-structural_engineer {
+  color: #f1e0c6;
+  background-color: rgba(168, 117, 55, 0.14);
+  border-color: rgba(168, 117, 55, 0.28);
+}
+
+.role-installations_engineer {
+  color: #e8d8ff;
+  background-color: rgba(122, 76, 182, 0.14);
+  border-color: rgba(122, 76, 182, 0.28);
+}
+
+.role-estimator {
+  color: #fff3c4;
+  background-color: rgba(164, 136, 38, 0.14);
+  border-color: rgba(164, 136, 38, 0.28);
+}
+
+.role-drafter {
+  color: #d9e7ff;
+  background-color: rgba(52, 92, 173, 0.14);
+  border-color: rgba(52, 92, 173, 0.28);
+}
+
+.role-technical_reviewer {
+  color: #f4dada;
+  background-color: rgba(160, 42, 42, 0.14);
+  border-color: rgba(160, 42, 42, 0.28);
+}
+
 .table tbody td {
   background-color: inherit;
   border-bottom: 0.5px solid #222120;
@@ -196,8 +318,48 @@ h6 {
 }
 
 .table-responsive {
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 18px 18px;
   overflow: hidden;
+}
+
+.card {
+  background-color: #111210;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.table thead th {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #1d1b18 !important;
+  transform: translateX(2px);
+}
+
+.btn-primary {
+  background-color: #c9a84c;
+  border-color: #c9a84c;
+}
+
+.btn-primary:hover {
+  background-color: #e8c46a;
+  border-color: #e8c46a;
+}
+
+.btn-outline-light {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 /* ── Botones ── */
@@ -285,6 +447,69 @@ h6 {
   font-family: 'Inter', sans-serif;
   padding: 9px 12px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-section {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1.5rem;
+}
+
+.form-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-label {
+  color: #c9a84c;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.35rem;
+}
+
+.section-title {
+  color: #e8e6e0;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 0;
+}
+
+.section-note {
+  color: #8a8880;
+  font-size: 12px;
+  max-width: 320px;
+}
+
+.summary-card {
+  background-color: #111210;
+  border: 1px solid rgba(201, 168, 76, 0.14);
+  border-radius: 14px;
+}
+
+.summary-label {
+  color: #8a8880;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.summary-value {
+  color: #c9a84c;
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.summary-note {
+  color: #8a8880;
+  font-size: 12px;
+  margin-top: 0.45rem;
 }
 
 .form-control:hover,

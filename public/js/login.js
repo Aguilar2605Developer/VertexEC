@@ -12,12 +12,33 @@ function setLoginType(role) {
   document.getElementById('loginRole').value = role;
 
   document.getElementById('clientTypeBtn').classList.toggle('active', role === 'user');
-  document.getElementById('proTypeBtn').classList.toggle('active', role === 'admin');
+  document.getElementById('proTypeBtn').classList.toggle('active', role === 'employee');
+  document.getElementById('adminTypeBtn').classList.toggle('active', role === 'admin');
 
-  const description = role === 'admin'
-    ? 'Accede como empleado para gestionar cotizaciones y proyectos de construcción.'
-    : 'Accede como cliente para enviar solicitudes y revisar propuestas de obra.';
+  const description = role === 'employee'
+    ? 'Accede como empleado para gestionar cotizaciones, coordinar roles técnicos y trabajar con equipos especializados.'
+    : role === 'admin'
+      ? 'Accede como administrador para supervisar usuarios, cotizaciones y configuración general.'
+      : 'Accede como cliente para enviar solicitudes y revisar propuestas de obra.';
   document.getElementById('userTypeDescription').textContent = description;
+}
+
+function revealAdminAccess() {
+  const adminBtn = document.getElementById('adminTypeBtn');
+  adminBtn.classList.remove('d-none');
+  setLoginType('admin');
+  document.getElementById('adminAccessHint').textContent = 'Acceso de administrador habilitado. Inicia sesión con tu cuenta admin.';
+  adminBtn.focus();
+}
+
+function handleAdminHotkey(event) {
+  const isF1 = event.key === 'F1' || event.code === 'F1' || event.keyCode === 112;
+  if (!event.ctrlKey || !isF1) {
+    return;
+  }
+
+  event.preventDefault();
+  revealAdminAccess();
 }
 
 function showAlert(message, type = 'danger') {
@@ -103,9 +124,9 @@ if (document.getElementById('signupForm')) {
   });
 }
 
-window.addEventListener('load', () => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    window.location.href = '/dashboard.html';
-  }
-});
+const token = localStorage.getItem('token');
+if (token) {
+  window.location.href = '/dashboard.html';
+} else {
+  window.addEventListener('keydown', handleAdminHotkey, true);
+}
