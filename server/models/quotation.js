@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const { roleCatalog } = require('../utils/roles');
+
+const roleKeys = roleCatalog.map(role => role.key);
 
 const quotationSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -22,6 +25,15 @@ const quotationSchema = new mongoose.Schema({
     hours: Number,
     rate_per_hour: Number,
     subtotal: Number
+  }],
+  
+  // Equipo asignado y roles técnicos
+  assigned_team: [{
+    role: { type: String, enum: roleKeys },
+    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    responsibilities: [String],
+    notes: String,
+    assigned_at: { type: Date, default: Date.now }
   }],
   
   // Totales

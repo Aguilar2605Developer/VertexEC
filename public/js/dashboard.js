@@ -8,6 +8,43 @@ let currentUserEditId = null;
 
 const API_URL = '/api/quotations';
 const USERS_API_URL = '/api/auth/users';
+const TEAM_MEMBERS_API_URL = '/api/auth/team-members';
+
+const ROLE_LABELS = {
+  user: 'Cliente',
+  admin: 'Administrador',
+  project_manager: 'Gerente de Proyecto / Coordinador General',
+  architect: 'Arquitecto',
+  structural_engineer: 'Ingeniero Estructural',
+  installations_engineer: 'Ingeniero de Instalaciones',
+  estimator: 'Estimador / Presupuestador',
+  drafter: 'Dibujante / Modelador (CAD o BIM)',
+  technical_reviewer: 'Revisor / Director Técnico'
+};
+
+const ROLE_RESPONSIBILITIES = {
+  project_manager: ['Coordinar el equipo', 'Definir cronograma', 'Revisar calidad final'],
+  architect: ['Definir planos arquitectónicos', 'Especificar alcances', 'Generar memoria descriptiva'],
+  structural_engineer: ['Cálculos estructurales', 'Memorias de cálculo', 'Presupuestar estructura'],
+  installations_engineer: ['Diseño eléctrico', 'Diseño sanitario', 'Diseño mecánico'],
+  estimator: ['Realizar metrados', 'APU y precios de mercado', 'Elaborar hoja de presupuesto'],
+  drafter: ['Producir planos CAD/BIM', 'Corregir planos', 'Modelar documentación técnica'],
+  technical_reviewer: ['Revisión final', 'Validar costos y alcance', 'Autorizar envío']
+};
+
+const ASSIGNABLE_ROLES = [
+  'project_manager',
+  'architect',
+  'structural_engineer',
+  'installations_engineer',
+  'estimator',
+  'drafter',
+  'technical_reviewer'
+];
+
+const ELEVATED_VIEW_ROLES = ['admin', 'project_manager'];
+
+let teamUsers = [];
 
 // Obtener token
 function getToken() {
@@ -26,6 +63,104 @@ function getHeaders() {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${getToken()}`
   };
+}
+
+function getUsersForRole(role) {
+  return teamUsers.filter(user => user.role === role);
+}
+
+function createRoleOptions(selectedRole = '') {
+  return ASSIGNABLE_ROLES.map(role => `
+    <option value="${role}" ${role === selectedRole ? 'selected' : ''}>
+      ${ROLE_LABELS[role]}
+    </option>
+  `).join('');
+}
+
+function createUserOptions(role, selectedUser = '') {
+  const users = getUsersForRole(role);
+  const options = [`
+    <option value="">Sin asignar</option>
+  `];
+  options.push(...users.map(user => `
+    <option value="${user._id}" ${user._id === selectedUser ? 'selected' : ''}>
+      ${user.name} ${user.company ? `(${user.company})` : ''}
+    </option>
+  `));
+
+  if (users.length === 0) {
+    options.push(`
+      <option value="" disabled>Sin usuarios disponibles</option>
+    `);
+  }
+  return options.join('');
+}
+
+function addTeamMemberRow(role = '', assignedTo = '', notes = '') {
+  const container = document.getElementById('assignedTeamContainer');
+  const rowId = `team-${Date.now()}`;
+  const row = document.createElement('div');
+  row.className = 'row gx-2 gy-2 mb-2';
+  row.id = rowId;
+  row.innerHTML = `
+    <div class="col-md-3">
+      <label class="form-label">Rol técnico</label>
+      <select class="form-select form-select-sm" name="teamRole" onchange="updateTeamMemberUsers(this)">
+        ${createRoleOptions(role || ASSIGNABLE_ROLES[0])}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Trabajador</label>
+      <select class="form-select form-select-sm" name="teamUser">
+        ${createUserOptions(role || ASSIGNABLE_ROLES[0], assignedTo)}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Notas del rol</label>
+      <input type="text" class="form-control form-control-sm" name="teamNotes" placeholder="E.g. Responsable de revisión final" value="${notes}">
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
+      <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="document.getElementById('${rowId}').remove()">
+        <i class="bi bi-trash"></i>
+      </button>
+    </div>
+  `;
+  container.appendChild(row);
+}
+
+function updateTeamMemberUsers(roleSelect) {
+  const row = roleSelect.closest('.row');
+  const userSelect = row.querySelector('select[name="teamUser"]');
+  const selectedRole = roleSelect.value;
+  userSelect.innerHTML = createUserOptions(selectedRole);
+}
+
+function buildAssignedTeamRows(team = []) {
+  const container = document.getElementById('assignedTeamContainer');
+  container.innerHTML = '';
+
+  const filledRoles = new Set();
+  team.forEach(member => {
+    addTeamMemberRow(member.role, member.assigned_to?._id || member.assigned_to || '', member.notes || '');
+    filledRoles.add(member.role);
+  });
+
+  ASSIGNABLE_ROLES.forEach(role => {
+    if (!filledRoles.has(role)) {
+      addTeamMemberRow(role, '', '');
+    }
+  });
+}
+
+async function loadTeamMembers() {
+  try {
+    const response = await fetch(TEAM_MEMBERS_API_URL, { headers: getHeaders() });
+    if (!response.ok) return;
+    teamUsers = await response.json();
+    buildAssignedTeamRows();
+  } catch (error) {
+    console.warn('No se pudieron cargar usuarios de equipo:', error.message);
+  }
 }
 
 // Mostrar alerta
@@ -75,9 +210,27 @@ async function loadQuotations() {
 
     allQuotations = await response.json();
     displayQuotations();
+    renderDashboardSummary();
   } catch (error) {
     showAlert('Error: ' + error.message, 'danger');
   }
+}
+
+function renderDashboardSummary() {
+  const total = allQuotations.length;
+  const draftCount = allQuotations.filter(q => q.status === 'draft').length;
+  const acceptedCount = allQuotations.filter(q => q.status === 'accepted').length;
+  const rejectedCount = allQuotations.filter(q => q.status === 'rejected').length;
+
+  const totalEl = document.getElementById('summaryTotalQuotations');
+  const draftEl = document.getElementById('summaryDraft');
+  const acceptedEl = document.getElementById('summaryAccepted');
+  const rejectedEl = document.getElementById('summaryRejected');
+
+  if (totalEl) totalEl.textContent = total;
+  if (draftEl) draftEl.textContent = draftCount;
+  if (acceptedEl) acceptedEl.textContent = acceptedCount;
+  if (rejectedEl) rejectedEl.textContent = rejectedCount;
 }
 
 // Mostrar cotizaciones en la tabla o vista de progreso
@@ -95,43 +248,47 @@ function displayQuotations() {
     return;
   }
 
-  if (user.role === 'admin') {
-    // Vista de tabla para admin
+  if (ELEVATED_VIEW_ROLES.includes(user.role)) {
+    // Vista de tabla para administradores y gerentes de proyecto
     container.innerHTML = `
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
-            <tr>
-              <th>Título</th>
-              <th>Cliente</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Creada</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${allQuotations.map(q => `
-              <tr onclick="viewQuotation('${q._id}')">
-                <td><strong>${q.title}</strong></td>
-                <td>${q.client_name}</td>
-                <td><strong>$${(q.final_total || 0).toFixed(2)}</strong></td>
-                <td><span class="badge status-${q.status}">${getStatusLabel(q.status)}</span></td>
-                <td><small>${new Date(q.created_at).toLocaleDateString()}</small></td>
-                <td onclick="event.stopPropagation()">
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary" onclick="editQuotation('${q._id}')">
-                      <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-outline-danger" onclick="deleteQuotation('${q._id}')">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Título</th>
+                  <th>Cliente</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                  <th>Creada</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${allQuotations.map(q => `
+                  <tr onclick="viewQuotation('${q._id}')">
+                    <td><strong>${q.title}</strong></td>
+                    <td>${q.client_name}</td>
+                    <td><strong>$${(q.final_total || 0).toFixed(2)}</strong></td>
+                    <td><span class="badge status-${q.status}">${getStatusLabel(q.status)}</span></td>
+                    <td><small>${new Date(q.created_at).toLocaleDateString()}</small></td>
+                    <td onclick="event.stopPropagation()">
+                      <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="editQuotation('${q._id}')">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteQuotation('${q._id}')">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     `;
   } else {
@@ -300,7 +457,7 @@ function calculateTotal() {
   const discount = parseFloat(document.getElementById('formDiscount').value) || 0;
   total -= discount;
 
-  document.getElementById('formTotal').value = `$${total.toFixed(2)}`;
+  document.getElementById('formTotal').textContent = `$${total.toFixed(2)}`;
 
   return total;
 }
@@ -311,6 +468,8 @@ async function saveQuotation() {
   const clientName = document.getElementById('formClientName').value;
   const description = document.getElementById('formDescription').value;
   const clientEmail = document.getElementById('formClientEmail').value;
+  const clientPhone = document.getElementById('formClientPhone').value;
+  const validUntil = document.getElementById('formValidUntil').value;
   const status = document.getElementById('formStatus').value;
   const discount = parseFloat(document.getElementById('formDiscount').value) || 0;
   const notes = document.getElementById('formNotes').value;
@@ -347,16 +506,34 @@ async function saveQuotation() {
     return;
   }
 
+  const assigned_team = [];
+  document.querySelectorAll('#assignedTeamContainer .row').forEach(row => {
+    const role = row.querySelector('select[name="teamRole"]').value;
+    const assigned_to = row.querySelector('select[name="teamUser"]').value;
+    const notesRow = row.querySelector('input[name="teamNotes"]').value;
+
+    if (role) {
+      assigned_team.push({
+        role,
+        assigned_to: assigned_to || undefined,
+        notes: notesRow || undefined
+      });
+    }
+  });
+
   const quotationData = {
     title,
     description,
     client_name: clientName,
     client_email: clientEmail,
+    client_phone: clientPhone,
+    valid_until: validUntil,
     materials,
     labor,
     discount,
     status,
-    notes
+    notes,
+    assigned_team
   };
 
   try {
@@ -403,13 +580,15 @@ function resetForm() {
   document.getElementById('quotationForm').reset();
   document.getElementById('materialsContainer').innerHTML = '';
   document.getElementById('laborContainer').innerHTML = '';
+  document.getElementById('assignedTeamContainer').innerHTML = '';
   document.getElementById('formStatus').value = 'draft';
   document.getElementById('formDiscount').value = '0';
-  document.getElementById('formTotal').value = '$0.00';
+  document.getElementById('formTotal').textContent = '$0.00';
   currentQuotationId = null;
   materialRowCount = 0;
   laborRowCount = 0;
   document.getElementById('modalTitle').textContent = 'Nueva Cotización';
+  buildAssignedTeamRows();
 }
 
 // Ver cotización
@@ -442,6 +621,18 @@ function viewQuotation(id) {
     <p><strong>Cliente:</strong> ${quotation.client_name}</p>
     <p><strong>Email:</strong> ${quotation.client_email}</p>
     <p><strong>Descripción:</strong> ${quotation.description}</p>
+    ${quotation.assigned_team && quotation.assigned_team.length ? `
+      <h6 class="mt-3">Equipo Asignado</h6>
+      <ul class="list-group mb-3">
+        ${quotation.assigned_team.map(member => `
+          <li class="list-group-item py-2">
+            <strong>${ROLE_LABELS[member.role] || member.role}</strong>
+            ${member.assigned_to ? ` - ${member.assigned_to.name || member.assigned_to}` : ' - No asignado'}
+            ${member.notes ? `<div class="text-muted small">${member.notes}</div>` : ''}
+          </li>
+        `).join('')}
+      </ul>
+    ` : ''}
     
     ${materialsHTML ? `
     <h6 class="mt-3">Materiales</h6>
@@ -495,6 +686,8 @@ function editQuotation(id) {
   document.getElementById('formDescription').value = quotation.description;
   document.getElementById('formClientName').value = quotation.client_name;
   document.getElementById('formClientEmail').value = quotation.client_email;
+  document.getElementById('formClientPhone').value = quotation.client_phone || '';
+  document.getElementById('formValidUntil').value = quotation.valid_until ? new Date(quotation.valid_until).toISOString().split('T')[0] : '';
   document.getElementById('formStatus').value = quotation.status;
   document.getElementById('formDiscount').value = quotation.discount;
   document.getElementById('formNotes').value = quotation.notes;
@@ -509,6 +702,7 @@ function editQuotation(id) {
     addLaborRow(l.description, l.hours, l.rate_per_hour);
   });
 
+  buildAssignedTeamRows(quotation.assigned_team || []);
   calculateTotal();
   document.getElementById('modalTitle').textContent = 'Editar Cotización';
 
@@ -592,7 +786,7 @@ function displayUsers() {
       <td>${u.email}</td>
       <td>${u.company || '-'}</td>
       <td>
-        <span class="badge ${u.role === 'admin' ? 'bg-danger' : 'bg-secondary'}">${u.role === 'admin' ? 'Admin' : 'Usuario'}</span>
+        <span class="role-badge role-${u.role}">${ROLE_LABELS[u.role] || u.role}</span>
       </td>
       <td>${new Date(u.created_at).toLocaleDateString()}</td>
       <td>
@@ -708,7 +902,7 @@ function resetUserForm() {
 }
 
 // Inicializar
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   const token = localStorage.getItem('token');
   if (!token) {
     window.location.href = '/login.html';
@@ -749,6 +943,7 @@ window.addEventListener('load', () => {
     }
   });
 
+  await loadTeamMembers();
   loadQuotations();
 
   // Refrescar el dashboard cada 8 segundos para que los cambios de estado del admin

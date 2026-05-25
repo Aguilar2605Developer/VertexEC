@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const { roleCatalog } = require('../utils/roles');
 const { generateToken, verifyToken, verifyAdmin } = require('../middleware/auth');
 const { getMongoStatus } = require('../config/db');
 const inMemoryStore = require('../utils/inMemoryStore');
@@ -8,7 +9,9 @@ const inMemoryStore = require('../utils/inMemoryStore');
 // Sign Up - Registro de usuario
 router.post('/signup', async (req, res) => {
   try {
-    const { name, email, password, company, phone } = req.body;
+    const { name, email, password, company, phone, role } = req.body;
+    const allowedRoles = roleCatalog.map(roleItem => roleItem.key);
+    const userRole = allowedRoles.includes(role) ? role : 'user';
     
     // Validar que vengan los datos requeridos
     if (!name || !email || !password) {
@@ -30,7 +33,7 @@ router.post('/signup', async (req, res) => {
         password,
         company,
         phone,
-        role: 'user'
+        role: userRole
       });
       
       await user.save();
@@ -61,7 +64,8 @@ router.post('/signup', async (req, res) => {
         password: hashedPassword,
         company,
         phone,
-        role: 'user'
+        role: userRole,
+        responsibilities: []
       };
       
       inMemoryStore.users.push(user);
@@ -82,7 +86,7 @@ router.post('/signup', async (req, res) => {
 // Login - Iniciar sesión
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
     
     // Validar que vengan los datos
     if (!email || !password) {
@@ -95,6 +99,16 @@ router.post('/login', async (req, res) => {
       const user = await User.findOne({ email: email.toLowerCase() });
       if (!user) {
         return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+      }
+      
+      if (role === 'employee' && user.role === 'user') {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
+      }
+      if (role === 'user' && user.role !== 'user') {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
+      }
+      if (role && role !== 'employee' && role !== 'user' && role !== user.role) {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
       }
       
       // Verificar contraseña
@@ -116,6 +130,16 @@ router.post('/login', async (req, res) => {
       const user = inMemoryStore.users.find(u => u.email === email.toLowerCase());
       if (!user) {
         return res.status(401).json({ error: 'Email o contraseña incorrectos' });
+      }
+      
+      if (role === 'employee' && user.role === 'user') {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
+      }
+      if (role === 'user' && user.role !== 'user') {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
+      }
+      if (role && role !== 'employee' && role !== 'user' && role !== user.role) {
+        return res.status(401).json({ error: 'Acceso denegado para este tipo de usuario' });
       }
       
       // Verificar contraseña (in-memory usa bcryptjs)
@@ -231,10 +255,41 @@ router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
   }
 });
 
+// List team members for assignment
+router.get('/team-members', verifyToken, async (req, res) => {
+  try {
+    const assignableRoles = roleCatalog
+      .filter(roleItem => roleItem.key !== 'user' && roleItem.key !== 'admin')
+      .map(roleItem => roleItem.key);
+
+    if (getMongoStatus()) {
+      const users = await User.find({ role: { $in: assignableRoles } }, '-password');
+      res.json(users);
+    } else {
+      const users = inMemoryStore.users
+        .filter(u => assignableRoles.includes(u.role))
+        .map(u => ({
+          _id: u._id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          company: u.company,
+          phone: u.phone,
+          created_at: u.created_at || new Date()
+        }));
+      res.json(users);
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Create user (admin only)
 router.post('/users', verifyToken, verifyAdmin, async (req, res) => {
   try {
     const { name, email, password, company, phone, role } = req.body;
+    const allowedRoles = roleCatalog.map(roleItem => roleItem.key);
+    const userRole = allowedRoles.includes(role) ? role : 'user';
     
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Nombre, email y contraseña son requeridos' });
@@ -252,7 +307,8 @@ router.post('/users', verifyToken, verifyAdmin, async (req, res) => {
         password,
         company,
         phone,
-        role: role || 'user'
+        role: userRole,
+        responsibilities: []
       });
       
       await user.save();
@@ -278,7 +334,7 @@ router.post('/users', verifyToken, verifyAdmin, async (req, res) => {
         password: hashedPassword,
         company,
         phone,
-        role: role || 'user',
+        role: userRole,
         created_at: new Date()
       };
       

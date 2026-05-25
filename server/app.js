@@ -20,11 +20,38 @@ app.use('/api/auth', authRoutes);
 app.use('/api/quotations', quotationRoutes);
 app.use('/api', apiRoutes);
 
-// Connect to MongoDB
-connectMongo();
-
 // Start server
-app.listen(PORT, () => {
-  console.log(`\n✅ Servidor ejecutándose en puerto ${PORT}`);
-  console.log(`🌐 Abre: http://localhost:${PORT}\n`);
-});
+const startServer = async () => {
+  const connected = await connectMongo();
+
+  if (!connected) {
+    const inMemoryStore = require('./utils/inMemoryStore');
+    const bcryptjs = require('bcryptjs');
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@vertexec.local';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin123!';
+
+    const existingAdmin = inMemoryStore.users.find(u => u.role === 'admin');
+    if (!existingAdmin) {
+      const salt = await bcryptjs.genSalt(10);
+      const passwordHash = await bcryptjs.hash(adminPassword, salt);
+      inMemoryStore.users.push({
+        _id: `admin_${Date.now()}`,
+        name: 'Administrador',
+        email: adminEmail,
+        password: passwordHash,
+        role: 'admin',
+        company: 'VertexEC',
+        created_at: new Date()
+      });
+      console.log(`🔐 Admin in-memory creado: ${adminEmail}`);
+      console.log('   Contraseña inicial:', adminPassword);
+    }
+  }
+
+  app.listen(PORT, () => {
+    console.log(`\n✅ Servidor ejecutándose en puerto ${PORT}`);
+    console.log(`🌐 Abre: http://localhost:${PORT}\n`);
+  });
+};
+
+startServer();

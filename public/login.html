@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - VertexEC</title>
+  <title>Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="css/login.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
   <div class="container min-vh-100 d-flex align-items-center justify-content-center">
     <div class="row w-100">
       <div class="col-md-6 offset-md-3 col-lg-4 offset-lg-4">
@@ -15,15 +15,24 @@
           <div class="card-body p-5">
             <div class="text-center mb-4">
               <h1 class="text-primary fw-bold">VertexEC</h1>
-              <p class="text-muted">Sistema de Cotización de Planos</p>
+              <p class="text-muted">Cotiza planos y controla tus proyectos de construcción</p>
             </div>
 
             <div id="alertContainer"></div>
 
+            <div class="d-flex justify-content-between align-items-center mb-4 user-type-toggle">
+              <button type="button" class="btn btn-outline-light btn-sm active" id="clientTypeBtn" onclick="setLoginType('user')">Cliente</button>
+              <button type="button" class="btn btn-outline-light btn-sm" id="proTypeBtn" onclick="setLoginType('employee')">Empleado</button>
+              <button type="button" class="btn btn-outline-light btn-sm d-none" id="adminTypeBtn" onclick="setLoginType('admin')">Administrador</button>
+            </div>
+            <p class="text-center text-muted mb-2" id="userTypeDescription">Accede como cliente para enviar solicitudes de cotización y revisar propuestas.</p>
+            <p class="text-center text-muted small mb-4" id="adminAccessHint">Presiona <strong>Ctrl + F1</strong> para habilitar el acceso de administrador.</p>
+
             <!-- Tab: Login -->
             <div id="loginTab">
-              <h4 class="mb-4 text-center">Iniciar Sesión</h4>
+              <h4 class="mb-4 text-center">Ingrese sus credenciales</h4>
               <form id="loginForm">
+                <input type="hidden" id="loginRole" value="user">
                 <div class="mb-3">
                   <label for="loginEmail" class="form-label">Email</label>
                   <input type="email" class="form-control" id="loginEmail" required>
@@ -59,6 +68,20 @@
                 <div class="mb-3">
                   <label for="signupCompany" class="form-label">Empresa (Opcional)</label>
                   <input type="text" class="form-control" id="signupCompany">
+                </div>
+                <div class="mb-3">
+                  <label for="signupRole" class="form-label">Tipo de cuenta</label>
+                  <select class="form-select" id="signupRole">
+                    <option value="user">Cliente</option>
+                    <option value="project_manager">Gerente de Proyecto / Coordinador General</option>
+                    <option value="architect">Arquitecto</option>
+                    <option value="structural_engineer">Ingeniero Estructural</option>
+                    <option value="installations_engineer">Ingeniero de Instalaciones (Eléctricas + Sanitarias + Mecánicas)</option>
+                    <option value="estimator">Estimador / Presupuestador</option>
+                    <option value="drafter">Dibujante / Modelador (CAD o BIM)</option>
+                    <option value="technical_reviewer">Revisor / Director Técnico</option>
+                  </select>
+                  <small class="text-muted">Selecciona tu rol profesional dentro del flujo de cotización.</small>
                 </div>
                 <button type="submit" class="btn btn-success w-100 mb-3">Registrarse</button>
               </form>
